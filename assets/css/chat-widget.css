@@ -319,6 +319,57 @@ div.wpsc-lead-form button.wpsc-lead-skip {
 }
 div.wpsc-lead-form button.wpsc-lead-skip:hover { color: #64748b !important; }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   SMART CONTACT LINKS (auto-linked emails, phones, addresses)
+   ══════════════════════════════════════════════════════════════════════════ */
+a.wpsc-smart-link {
+    display: inline-block !important;
+    padding: 5px 12px !important;
+    margin: 3px 0 !important;
+    border-radius: 20px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    line-height: 1.4 !important;
+}
+
+a.wpsc-smart-email {
+    background: #eff6ff !important;
+    color: #2563eb !important;
+    border: 1px solid #bfdbfe !important;
+}
+a.wpsc-smart-email:hover {
+    background: #dbeafe !important;
+    border-color: #93c5fd !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(37,99,235,0.15);
+}
+
+a.wpsc-smart-phone {
+    background: #f0fdf4 !important;
+    color: #16a34a !important;
+    border: 1px solid #bbf7d0 !important;
+}
+a.wpsc-smart-phone:hover {
+    background: #dcfce7 !important;
+    border-color: #86efac !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(22,163,74,0.15);
+}
+
+a.wpsc-smart-address {
+    background: #fef3c7 !important;
+    color: #d97706 !important;
+    border: 1px solid #fde68a !important;
+}
+a.wpsc-smart-address:hover {
+    background: #fde68a !important;
+    border-color: #fcd34d !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(217,119,6,0.15);
+}
+
 /* ── Hide on Mobile ─────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     .wpsc-hide-mobile { display: none !important; }

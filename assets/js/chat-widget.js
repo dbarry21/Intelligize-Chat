@@ -417,12 +417,47 @@
         requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; });
     }
 
-    // ── Markdown ──────────────────────────────────────────────────────────
+    // ── Markdown + Smart Contact Linking ─────────────────────────────────
     function renderMarkdown(text) {
         let html = escapeHtml(text);
+
+        // Bold: **text**
         html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+        // Markdown links: [text](url)
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+        // ── Auto-link emails ──
+        // Matches common email patterns not already inside an href
+        html = html.replace(
+            /(?<!href=["'](?:[^"']*))(?<!>)\b([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b/g,
+            '<a href="mailto:$1" class="wpsc-smart-link wpsc-smart-email">📧 $1</a>'
+        );
+
+        // ── Auto-link phone numbers ──
+        // Matches: (555) 123-4567, 555-123-4567, +1 555 123 4567, +15551234567, etc.
+        html = html.replace(
+            /(?<![\w\-])(\+?1?\s*[-.]?\s*\(?\d{3}\)?[\s.\-]*\d{3}[\s.\-]*\d{4})(?![\w\-])/g,
+            function(match, phone) {
+                var digits = phone.replace(/[^\d+]/g, '');
+                if (digits.length < 10) return match; // Skip if too short
+                return '<a href="tel:' + digits + '" class="wpsc-smart-link wpsc-smart-phone">📞 ' + phone.trim() + '</a>';
+            }
+        );
+
+        // ── Auto-link addresses ──
+        // Matches patterns like: 123 Main St, City, ST 12345 or similar
+        html = html.replace(
+            /(\d{1,5}\s+[A-Za-z0-9\s.]+(?:Street|St|Avenue|Ave|Boulevard|Blvd|Drive|Dr|Road|Rd|Lane|Ln|Way|Court|Ct|Circle|Cir|Place|Pl|Parkway|Pkwy|Highway|Hwy)[.,]?\s*(?:[A-Za-z\s]+,\s*)?(?:[A-Z]{2}\s+\d{5}(?:-\d{4})?))/gi,
+            function(match, addr) {
+                var encoded = encodeURIComponent(addr.trim());
+                return '<a href="https://www.google.com/maps/search/?api=1&query=' + encoded + '" target="_blank" rel="noopener" class="wpsc-smart-link wpsc-smart-address">📍 ' + addr.trim() + '</a>';
+            }
+        );
+
+        // Line breaks
         html = html.replace(/\n/g, '<br>');
+
         return html;
     }
 

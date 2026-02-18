@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Intelligize Chat — Floating Chat Widget
+   Intelligize Chat v2.0 — Floating Chat Widget
    All padding/margin uses !important to survive WordPress theme resets.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Scoped Reset — NO blanket padding:0 ────────────────────────────────── */
+/* ── Scoped Reset ───────────────────────────────────────────────────────── */
 #wpsc-chat-widget,
 #wpsc-chat-widget *,
 #wpsc-chat-widget *::before,
@@ -30,7 +30,7 @@
     color: #fff !important; cursor: pointer !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
     padding: 0 !important; margin: 0 !important;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.15), 0 0 0 0 var(--wpsc-primary, #2563eb) !important;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
     transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease !important;
     position: absolute !important; bottom: 0 !important;
 }
@@ -100,14 +100,10 @@
    MESSAGES AREA
    ══════════════════════════════════════════════════════════════════════════ */
 #wpsc-messages.wpsc-messages {
-    flex: 1 !important;
-    overflow-y: auto !important;
-    padding: 22px 24px !important;
-    margin: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 16px !important;
-    scroll-behavior: smooth !important;
+    flex: 1 !important; overflow-y: auto !important;
+    padding: 22px 24px !important; margin: 0 !important;
+    display: flex !important; flex-direction: column !important;
+    gap: 16px !important; scroll-behavior: smooth !important;
     background: #f8fafc !important;
 }
 #wpsc-messages.wpsc-messages::-webkit-scrollbar { width: 5px; }
@@ -116,20 +112,14 @@
 
 /* ── Message Bubbles ────────────────────────────────────────────────────── */
 div.wpsc-msg {
-    max-width: 85% !important;
-    padding: 12px 16px !important;
-    margin: 0 !important;
-    border-radius: 16px !important;
-    font-size: 14px !important;
-    line-height: 1.55 !important;
-    word-wrap: break-word !important;
-    animation: wpsc-fade-in 0.3s ease;
+    max-width: 85% !important; padding: 12px 16px !important; margin: 0 !important;
+    border-radius: 16px !important; font-size: 14px !important; line-height: 1.55 !important;
+    word-wrap: break-word !important; animation: wpsc-fade-in 0.3s ease;
 }
 @keyframes wpsc-fade-in {
     from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
 div.wpsc-msg.wpsc-msg-bot {
     background: #fff !important; color: #1e293b !important;
     align-self: flex-start !important; border-bottom-left-radius: 4px !important;
@@ -167,30 +157,17 @@ a.wpsc-source-link:hover { background: #e2e8f0 !important; color: #1e293b !impor
    INPUT AREA
    ══════════════════════════════════════════════════════════════════════════ */
 .wpsc-input-area {
-    display: flex !important;
-    align-items: flex-end !important;
-    gap: 10px !important;
-    padding: 16px 24px !important;
-    margin: 0 !important;
-    border-top: 1px solid #e2e8f0 !important;
-    background: #fff !important;
+    display: flex !important; align-items: flex-end !important;
+    gap: 10px !important; padding: 16px 24px !important; margin: 0 !important;
+    border-top: 1px solid #e2e8f0 !important; background: #fff !important;
 }
-
 textarea#wpsc-input.wpsc-input {
-    flex: 1 !important;
-    border: 1.5px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    padding: 10px 14px !important;
-    margin: 0 !important;
-    font-size: 14px !important;
-    line-height: 1.4 !important;
-    resize: none !important;
-    outline: none !important;
-    max-height: 100px !important;
-    min-height: 42px !important;
-    background: #f8fafc !important;
-    color: #1e293b !important;
-    width: auto !important;
+    flex: 1 !important; border: 1.5px solid #e2e8f0 !important;
+    border-radius: 12px !important; padding: 10px 14px !important; margin: 0 !important;
+    font-size: 14px !important; line-height: 1.4 !important;
+    resize: none !important; outline: none !important;
+    max-height: 100px !important; min-height: 42px !important;
+    background: #f8fafc !important; color: #1e293b !important; width: auto !important;
     transition: border-color 0.2s ease, background 0.2s ease !important;
 }
 textarea#wpsc-input.wpsc-input:focus { border-color: var(--wpsc-primary, #2563eb) !important; background: #fff !important; }
@@ -217,76 +194,133 @@ button#wpsc-send.wpsc-send-btn:disabled { opacity: 0.5; cursor: not-allowed; tra
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   QUICK REPLIES — Large, stacked, roomy
+   QUICK REPLIES
    ══════════════════════════════════════════════════════════════════════════ */
 div.wpsc-quick-replies {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 10px !important;
-    padding: 6px 0 4px !important;
-    margin: 0 !important;
+    display: flex !important; flex-direction: column !important;
+    gap: 10px !important; padding: 6px 0 4px !important; margin: 0 !important;
     list-style: none !important;
 }
-
 div.wpsc-quick-replies button.wpsc-quick-reply {
-    padding: 13px 20px !important;
-    margin: 0 !important;
-    border: 1.5px solid #dbe4ef !important;
-    border-radius: 14px !important;
-    background: #fff !important;
-    font-size: 14px !important;
-    color: #374151 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    line-height: 1.4 !important;
-    text-align: left !important;
-    width: 100% !important;
-    display: block !important;
+    padding: 13px 20px !important; margin: 0 !important;
+    border: 1.5px solid #dbe4ef !important; border-radius: 14px !important;
+    background: #fff !important; font-size: 14px !important;
+    color: #374151 !important; cursor: pointer !important;
+    transition: all 0.2s ease !important; line-height: 1.4 !important;
+    text-align: left !important; width: 100% !important; display: block !important;
 }
-
 div.wpsc-quick-replies button.wpsc-quick-reply:hover {
     border-color: var(--wpsc-primary, #2563eb) !important;
     color: var(--wpsc-primary, #2563eb) !important;
-    background: #eff6ff !important;
-    transform: translateY(-1px);
+    background: #eff6ff !important; transform: translateY(-1px);
     box-shadow: 0 3px 12px rgba(37,99,235,0.12);
 }
-div.wpsc-quick-replies button.wpsc-quick-reply:active {
-    transform: translateY(0);
-    box-shadow: none;
-}
+div.wpsc-quick-replies button.wpsc-quick-reply:active { transform: translateY(0); box-shadow: none; }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   RETURN TO START
+   ACTION BUTTONS (Return to Start + Contact)
    ══════════════════════════════════════════════════════════════════════════ */
-div.wpsc-return-start {
-    display: flex !important;
-    justify-content: center !important;
-    padding: 4px 0 2px !important;
-    margin: 0 !important;
+div.wpsc-action-buttons {
+    display: flex !important; flex-direction: column !important;
+    align-items: center !important; gap: 10px !important;
+    padding: 6px 0 2px !important; margin: 0 !important;
     animation: wpsc-fade-in 0.3s ease;
 }
 
-div.wpsc-return-start button.wpsc-return-btn {
-    padding: 8px 20px !important;
-    margin: 0 !important;
-    border: 1.5px solid #e2e8f0 !important;
-    border-radius: 20px !important;
-    background: #fff !important;
-    font-size: 13px !important;
-    color: #64748b !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
-    line-height: 1.3 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 4px !important;
+div.wpsc-action-buttons button.wpsc-return-btn {
+    padding: 8px 20px !important; margin: 0 !important;
+    border: 1.5px solid #e2e8f0 !important; border-radius: 20px !important;
+    background: #fff !important; font-size: 13px !important;
+    color: #64748b !important; cursor: pointer !important;
+    transition: all 0.2s ease !important; line-height: 1.3 !important;
+    display: inline-flex !important; align-items: center !important; gap: 4px !important;
 }
-
-div.wpsc-return-start button.wpsc-return-btn:hover {
+div.wpsc-action-buttons button.wpsc-return-btn:hover {
     border-color: var(--wpsc-primary, #2563eb) !important;
     color: var(--wpsc-primary, #2563eb) !important;
     background: #eff6ff !important;
+}
+
+/* Contact buttons row */
+div.wpsc-contact-buttons {
+    display: flex !important; flex-wrap: wrap !important;
+    justify-content: center !important; gap: 8px !important;
+    padding: 0 !important; margin: 0 !important;
+}
+
+.wpsc-contact-buttons a.wpsc-contact-btn {
+    padding: 8px 16px !important; margin: 0 !important;
+    border: 1.5px solid #dbe4ef !important; border-radius: 20px !important;
+    background: #fff !important; font-size: 12px !important;
+    color: #374151 !important; cursor: pointer !important;
+    text-decoration: none !important; transition: all 0.2s ease !important;
+    line-height: 1.3 !important; display: inline-flex !important;
+    align-items: center !important; gap: 4px !important; white-space: nowrap !important;
+}
+
+.wpsc-contact-buttons a.wpsc-contact-btn:hover {
+    border-color: var(--wpsc-primary, #2563eb) !important;
+    color: var(--wpsc-primary, #2563eb) !important;
+    background: #eff6ff !important; transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(37,99,235,0.1);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LEAD CAPTURE FORM
+   ══════════════════════════════════════════════════════════════════════════ */
+div.wpsc-lead-form {
+    display: flex !important; flex-direction: column !important;
+    gap: 12px !important; padding: 20px !important; margin: 0 !important;
+    background: #fff !important; border-radius: 16px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    animation: wpsc-fade-in 0.4s ease;
+}
+
+div.wpsc-lead-form .wpsc-lead-title {
+    font-size: 15px !important; font-weight: 600 !important;
+    color: #1e293b !important; line-height: 1.4 !important;
+    margin: 0 0 4px 0 !important; padding: 0 !important;
+}
+
+div.wpsc-lead-form input.wpsc-lead-input {
+    width: 100% !important; padding: 11px 14px !important; margin: 0 !important;
+    border: 1.5px solid #e2e8f0 !important; border-radius: 10px !important;
+    font-size: 14px !important; color: #1e293b !important;
+    background: #f8fafc !important; outline: none !important;
+    transition: border-color 0.2s ease, background 0.2s ease !important;
+    line-height: 1.4 !important;
+}
+div.wpsc-lead-form input.wpsc-lead-input:focus {
+    border-color: var(--wpsc-primary, #2563eb) !important;
+    background: #fff !important;
+}
+div.wpsc-lead-form input.wpsc-lead-input::placeholder { color: #94a3b8 !important; }
+
+div.wpsc-lead-form button.wpsc-lead-submit {
+    width: 100% !important; padding: 12px 20px !important; margin: 0 !important;
+    border: none !important; border-radius: 10px !important;
+    background: var(--wpsc-primary, #2563eb) !important;
+    color: #fff !important; font-size: 14px !important; font-weight: 600 !important;
+    cursor: pointer !important; transition: all 0.2s ease !important;
+    line-height: 1.4 !important;
+}
+div.wpsc-lead-form button.wpsc-lead-submit:hover {
+    filter: brightness(1.1); transform: translateY(-1px);
+    box-shadow: 0 3px 12px rgba(37,99,235,0.2);
+}
+
+div.wpsc-lead-form button.wpsc-lead-skip {
+    width: 100% !important; padding: 8px 16px !important; margin: 0 !important;
+    border: none !important; border-radius: 8px !important;
+    background: transparent !important; color: #94a3b8 !important;
+    font-size: 13px !important; cursor: pointer !important;
+    transition: color 0.2s ease !important; line-height: 1.3 !important;
+}
+div.wpsc-lead-form button.wpsc-lead-skip:hover { color: #64748b !important; }
+
+/* ── Hide on Mobile ─────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .wpsc-hide-mobile { display: none !important; }
 }
 
 /* ── Mobile Responsive ──────────────────────────────────────────────────── */

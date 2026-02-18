@@ -59,7 +59,7 @@
         // Show welcome message + quick replies on first open
         if (messages.children.length === 0) {
             if (CFG.welcome) {
-                addBotMessage(CFG.welcome);
+                addBotMessageClean(CFG.welcome);
             }
             if (CFG.quickReplies && CFG.quickReplies.length > 0) {
                 showQuickReplies(CFG.quickReplies);
@@ -163,6 +163,8 @@
     }
 
     function addBotMessage(text, sources) {
+        removeReturnToStart();
+
         const el = document.createElement('div');
         el.className = 'wpsc-msg wpsc-msg-bot';
         el.innerHTML = renderMarkdown(text);
@@ -184,7 +186,53 @@
         }
 
         messages.appendChild(el);
+        showReturnToStart();
         scrollToBottom();
+    }
+
+    // Bot message without the Return button (used for welcome message)
+    function addBotMessageClean(text) {
+        const el = document.createElement('div');
+        el.className = 'wpsc-msg wpsc-msg-bot';
+        el.innerHTML = renderMarkdown(text);
+        messages.appendChild(el);
+        scrollToBottom();
+    }
+
+    // ── Return to Start ──────────────────────────────────────────────────
+    function showReturnToStart() {
+        removeReturnToStart();
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'wpsc-return-start';
+
+        const btn = document.createElement('button');
+        btn.className = 'wpsc-return-btn';
+        btn.textContent = '↩ Return to Start';
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetChat();
+        });
+
+        wrapper.appendChild(btn);
+        messages.appendChild(wrapper);
+    }
+
+    function removeReturnToStart() {
+        messages.querySelectorAll('.wpsc-return-start').forEach((el) => el.remove());
+    }
+
+    function resetChat() {
+        messages.innerHTML = '';
+        history = [];
+
+        // Show welcome + quick replies again
+        if (CFG.welcome) {
+            addBotMessageClean(CFG.welcome);
+        }
+        if (CFG.quickReplies && CFG.quickReplies.length > 0) {
+            showQuickReplies(CFG.quickReplies);
+        }
     }
 
     // ── Typing Indicator ─────────────────────────────────────────────────

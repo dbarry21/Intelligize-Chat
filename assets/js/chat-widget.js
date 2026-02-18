@@ -39,7 +39,7 @@
 
         // Close on outside click
         document.addEventListener('click', (e) => {
-            if (isOpen && !widget.contains(e.target)) {
+            if (isOpen && !widget.contains(e.target) && !e.target.closest('#wpsc-chat-widget') && !e.target.classList.contains('wpsc-quick-reply')) {
                 closeChat();
             }
         });
@@ -215,7 +215,8 @@
             const btn = document.createElement('button');
             btn.className = 'wpsc-quick-reply';
             btn.textContent = text;
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent "outside click" from closing the window
                 removeQuickReplies();
                 input.value = text;
                 sendMessage();

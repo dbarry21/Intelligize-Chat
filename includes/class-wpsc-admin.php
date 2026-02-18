@@ -2,7 +2,7 @@
 /**
  * Admin Settings Page
  *
- * @package WP_SmartChat
+ * @package Intelligize_Chat
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -22,15 +22,17 @@ class WPSC_Admin {
     }
 
     /**
-     * Add the settings page under the Settings menu.
+     * Top-level admin menu item.
      */
     public function add_menu_page() {
-        add_options_page(
+        add_menu_page(
             __( 'Intelligize Chat', 'intelligize-chat' ),
             __( 'Intelligize Chat', 'intelligize-chat' ),
             'manage_options',
-            'wp-smartchat',
-            array( $this, 'render_settings_page' )
+            'intelligize-chat',
+            array( $this, 'render_settings_page' ),
+            'dashicons-format-chat',
+            80
         );
     }
 
@@ -38,6 +40,7 @@ class WPSC_Admin {
      * Register all settings.
      */
     public function register_settings() {
+        register_setting( 'wpsc_settings', 'wpsc_enabled' );
         register_setting( 'wpsc_settings', 'wpsc_bot_name', 'sanitize_text_field' );
         register_setting( 'wpsc_settings', 'wpsc_welcome_message', 'sanitize_textarea_field' );
         register_setting( 'wpsc_settings', 'wpsc_primary_color', 'sanitize_hex_color' );
@@ -54,10 +57,10 @@ class WPSC_Admin {
     }
 
     /**
-     * Admin styles.
+     * Admin styles + color picker.
      */
     public function enqueue_admin_assets( $hook ) {
-        if ( 'settings_page_wp-smartchat' !== $hook ) {
+        if ( 'toplevel_page_intelligize-chat' !== $hook ) {
             return;
         }
         wp_enqueue_style( 'wp-color-picker' );
@@ -83,22 +86,47 @@ class WPSC_Admin {
             echo '<div class="notice notice-success"><p>Content index rebuilt — ' . count( $index ) . ' pages indexed.</p></div>';
         }
 
-        $bot_name    = get_option( 'wpsc_bot_name', 'Intelligize Assistant' );
-        $welcome     = get_option( 'wpsc_welcome_message', 'Hi there! 👋 How can I help you today?' );
-        $color       = get_option( 'wpsc_primary_color', '#2563eb' );
-        $position    = get_option( 'wpsc_position', 'bottom-right' );
-        $provider    = get_option( 'wpsc_ai_provider', 'local' );
-        $api_key     = get_option( 'wpsc_api_key', '' );
-        $post_types  = get_option( 'wpsc_post_types', array( 'page', 'post' ) );
+        $enabled       = get_option( 'wpsc_enabled', '1' );
+        $bot_name      = get_option( 'wpsc_bot_name', 'Intelligize Assistant' );
+        $welcome       = get_option( 'wpsc_welcome_message', 'Hi there! 👋 How can I help you today?' );
+        $color         = get_option( 'wpsc_primary_color', '#2563eb' );
+        $position      = get_option( 'wpsc_position', 'bottom-right' );
+        $provider      = get_option( 'wpsc_ai_provider', 'local' );
+        $api_key       = get_option( 'wpsc_api_key', '' );
+        $post_types    = get_option( 'wpsc_post_types', array( 'page', 'post' ) );
         $quick_replies = get_option( 'wpsc_quick_replies', "What services do you offer?\nHow can I contact you?\nTell me about pricing" );
-        $all_types   = get_post_types( array( 'public' => true ), 'objects' );
+        $all_types     = get_post_types( array( 'public' => true ), 'objects' );
         ?>
         <div class="wrap">
-            <h1>🤖 Intelligize Chat Settings</h1>
+            <h1>🤖 Intelligize Chat</h1>
 
             <form method="post" action="options.php">
                 <?php settings_fields( 'wpsc_settings' ); ?>
 
+                <!-- ▸ Enable / Disable ────────────────────────────────── -->
+                <div style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid <?php echo $enabled ? '#00a32a' : '#d63638'; ?>;padding:16px 20px;margin:20px 0;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:space-between;">
+                    <div>
+                        <strong style="font-size:15px;">
+                            <?php if ( $enabled ) : ?>
+                                ✅ Chatbot is <span style="color:#00a32a;">Enabled</span>
+                            <?php else : ?>
+                                ⛔ Chatbot is <span style="color:#d63638;">Disabled</span>
+                            <?php endif; ?>
+                        </strong>
+                        <p style="margin:4px 0 0;color:#646970;">Toggle the chatbot on or off across your entire site.</p>
+                    </div>
+                    <label style="position:relative;display:inline-block;width:52px;height:28px;flex-shrink:0;margin-left:20px;">
+                        <input type="hidden" name="wpsc_enabled" value="0">
+                        <input type="checkbox" name="wpsc_enabled" value="1" <?php checked( $enabled, '1' ); ?>
+                            style="opacity:0;width:0;height:0;position:absolute;"
+                            onchange="this.form.submit();">
+                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:<?php echo $enabled ? '#00a32a' : '#c3c4c7'; ?>;border-radius:28px;transition:0.3s;">
+                            <span style="position:absolute;content:'';height:22px;width:22px;left:<?php echo $enabled ? '27px' : '3px'; ?>;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);display:block;"></span>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- ▸ Appearance ──────────────────────────────────────── -->
                 <h2 class="title">Appearance</h2>
                 <table class="form-table">
                     <tr>
@@ -131,6 +159,7 @@ class WPSC_Admin {
                     </tr>
                 </table>
 
+                <!-- ▸ AI Provider ─────────────────────────────────────── -->
                 <h2 class="title">AI Provider</h2>
                 <table class="form-table">
                     <tr>
@@ -153,6 +182,7 @@ class WPSC_Admin {
                     </tr>
                 </table>
 
+                <!-- ▸ Content Sources ─────────────────────────────────── -->
                 <h2 class="title">Content Sources</h2>
                 <table class="form-table">
                     <tr>

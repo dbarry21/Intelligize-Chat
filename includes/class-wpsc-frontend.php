@@ -20,8 +20,8 @@ class WPSC_Frontend {
      * Enqueue CSS and JS on the frontend.
      */
     public function enqueue_assets() {
-        // Don't load in admin or for wp-login
-        if ( is_admin() ) {
+        // Don't load if disabled, in admin, or wp-login
+        if ( is_admin() || get_option( 'wpsc_enabled', '1' ) !== '1' ) {
             return;
         }
 
@@ -60,7 +60,7 @@ class WPSC_Frontend {
      * Render the chat widget HTML shell in the footer.
      */
     public function render_widget() {
-        if ( is_admin() ) {
+        if ( is_admin() || get_option( 'wpsc_enabled', '1' ) !== '1' ) {
             return;
         }
 

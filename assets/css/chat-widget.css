@@ -77,6 +77,13 @@
     /* Override the open transition transform so dragging isn't janky */
     transition: box-shadow 0.2s ease, width 0.2s ease, height 0.2s ease !important;
 }
+/* Must override the parent-scoped right/left with higher specificity */
+.wpsc-bottom-right .wpsc-window.wpsc-undocked,
+.wpsc-bottom-left .wpsc-window.wpsc-undocked {
+    right: auto !important;
+    left: auto !important;
+    bottom: auto !important;
+}
 
 .wpsc-window.wpsc-dragging {
     box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 6px 16px rgba(0,0,0,0.1) !important;

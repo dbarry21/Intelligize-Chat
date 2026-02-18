@@ -75,6 +75,17 @@ intelligize-chat/
 
 ## Changelog
 
+### v2.3.2 — Viewport Constraint Fix
+- **Fixed:** Chat window flying off-screen on multi-monitor setups
+- **Fixed:** Used `style.setProperty('important')` to guarantee inline styles override all CSS `!important` rules
+- **Fixed:** Drag now hard-constrained to browser viewport — window cannot leave the visible area at all
+- **Fixed:** Dock restore properly clears all inline position overrides via `removeProperty()`
+
+### v2.3.1 — Undock Positioning Fix
+- **Fixed:** Chat window flying off-screen to the right when clicking the pop-out button
+- **Fixed:** CSS specificity issue where parent `.wpsc-bottom-right` rule overrode undocked positioning
+- **Fixed:** Position now calculated from viewport dimensions instead of relying on `getBoundingClientRect` (which was skewed by CSS transforms)
+
 ### v2.3.0 — Draggable & Dockable Chat Window
 - **New:** Pop-out button in chat header to undock the window
 - **New:** Drag the chat window anywhere on screen by its header

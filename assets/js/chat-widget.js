@@ -140,15 +140,36 @@
     function undockWindow() {
         if (isMobile()) return;
 
-        // Get current position on screen before undocking
-        const rect = chatWin.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const pos = CFG.position || 'bottom-right';
+        const winWidth = chatWin.offsetWidth || 390;
+        const winHeight = chatWin.offsetHeight || 580;
+
+        // Calculate starting position (where the docked window visually sits)
+        let startTop = vh - 24 - 76 - winHeight;
+        let startLeft;
+
+        if (pos === 'bottom-left') {
+            startLeft = 24;
+        } else {
+            startLeft = vw - 24 - winWidth;
+        }
+
+        // Clamp fully inside the browser viewport
+        startTop = Math.max(10, Math.min(vh - winHeight - 10, startTop));
+        startLeft = Math.max(10, Math.min(vw - winWidth - 10, startLeft));
 
         isDocked = false;
         chatWin.classList.add('wpsc-undocked');
 
-        // Position at current visual location
-        chatWin.style.top = rect.top + 'px';
-        chatWin.style.left = rect.left + 'px';
+        // CRITICAL: Force-clear all CSS positioning via inline styles.
+        // Inline !important beats everything, including .wpsc-bottom-right .wpsc-window { right: 0 !important }
+        chatWin.style.setProperty('position', 'fixed', 'important');
+        chatWin.style.setProperty('top', startTop + 'px', 'important');
+        chatWin.style.setProperty('left', startLeft + 'px', 'important');
+        chatWin.style.setProperty('right', 'auto', 'important');
+        chatWin.style.setProperty('bottom', 'auto', 'important');
 
         // Update button icon to "dock back" (arrows pointing inward)
         const dockBtn = document.getElementById('wpsc-dock-btn');
@@ -164,9 +185,12 @@
         chatWin.classList.remove('wpsc-undocked');
         chatWin.classList.remove('wpsc-dragging');
 
-        // Clear inline position
-        chatWin.style.top = '';
-        chatWin.style.left = '';
+        // Remove ALL inline position overrides so CSS rules take back over
+        chatWin.style.removeProperty('position');
+        chatWin.style.removeProperty('top');
+        chatWin.style.removeProperty('left');
+        chatWin.style.removeProperty('right');
+        chatWin.style.removeProperty('bottom');
 
         // Hide snap zone
         removeSnapZone();
@@ -213,7 +237,7 @@
 
         chatWin.classList.add('wpsc-dragging');
 
-        // Calculate new position, clamped to viewport
+        // Calculate new position — fully constrained inside browser viewport
         const vw = window.innerWidth;
         const vh = window.innerHeight;
         const w = chatWin.offsetWidth;
@@ -222,12 +246,12 @@
         let newX = windowStartX + dx;
         let newY = windowStartY + dy;
 
-        // Keep at least 60px visible on screen
-        newX = Math.max(-w + 60, Math.min(vw - 60, newX));
-        newY = Math.max(0, Math.min(vh - 60, newY));
+        // Hard clamp: entire window must stay inside viewport
+        newX = Math.max(0, Math.min(vw - w, newX));
+        newY = Math.max(0, Math.min(vh - h, newY));
 
-        chatWin.style.left = newX + 'px';
-        chatWin.style.top = newY + 'px';
+        chatWin.style.setProperty('left', newX + 'px', 'important');
+        chatWin.style.setProperty('top', newY + 'px', 'important');
 
         // Show snap zone when dragged near the original dock position
         checkSnapZone(newX, newY);

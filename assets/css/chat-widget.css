@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   Intelligize Chat v2.0 — Floating Chat Widget
+   Intelligize Chat v2.3 — Floating Chat Widget (Draggable)
    All padding/margin uses !important to survive WordPress theme resets.
    ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -65,14 +65,116 @@
 .wpsc-bottom-left  .wpsc-window { left: 0 !important; }
 .wpsc-widget.wpsc-open .wpsc-window { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 
+/* ── Undocked / Draggable State ─────────────────────────────────────────── */
+.wpsc-window.wpsc-undocked {
+    position: fixed !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    border-radius: 16px !important;
+    z-index: 1000000 !important;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.18), 0 4px 12px rgba(0,0,0,0.08) !important;
+    /* Override the open transition transform so dragging isn't janky */
+    transition: box-shadow 0.2s ease, width 0.2s ease, height 0.2s ease !important;
+}
+
+.wpsc-window.wpsc-dragging {
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25), 0 6px 16px rgba(0,0,0,0.1) !important;
+    cursor: grabbing !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.wpsc-window.wpsc-undocked .wpsc-header {
+    cursor: grab !important;
+}
+
+.wpsc-window.wpsc-dragging .wpsc-header {
+    cursor: grabbing !important;
+}
+
+/* ── Drag Handle Indicator (subtle dots on header) ──────────────────────── */
+.wpsc-drag-handle {
+    display: none;
+    position: absolute !important;
+    left: 50% !important;
+    top: 8px !important;
+    transform: translateX(-50%) !important;
+    width: 32px !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+    background: rgba(255,255,255,0.35) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: none !important;
+    transition: background 0.2s ease !important;
+}
+
+.wpsc-undocked .wpsc-drag-handle {
+    display: block !important;
+}
+
+.wpsc-undocked .wpsc-header:hover .wpsc-drag-handle {
+    background: rgba(255,255,255,0.6) !important;
+}
+
+/* ── Dock / Undock Button ───────────────────────────────────────────────── */
+.wpsc-dock-btn {
+    background: rgba(255,255,255,0.15) !important;
+    border: none !important;
+    color: #fff !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 0 0 6px !important;
+    transition: background 0.2s ease !important;
+    flex-shrink: 0 !important;
+}
+.wpsc-dock-btn:hover {
+    background: rgba(255,255,255,0.3) !important;
+}
+.wpsc-dock-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ── Snap Indicator (shows where it'll dock back) ───────────────────────── */
+.wpsc-snap-zone {
+    display: none;
+    position: fixed !important;
+    bottom: 90px !important;
+    width: 390px !important;
+    height: 580px !important;
+    border: 2px dashed rgba(37,99,235,0.4) !important;
+    border-radius: 16px !important;
+    background: rgba(37,99,235,0.05) !important;
+    z-index: 999998 !important;
+    pointer-events: none !important;
+    transition: opacity 0.2s ease !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.wpsc-snap-zone.wpsc-snap-right { right: 24px !important; }
+.wpsc-snap-zone.wpsc-snap-left  { left: 24px !important; }
+.wpsc-snap-zone.wpsc-snap-visible { display: block !important; }
+
 /* ── Header ─────────────────────────────────────────────────────────────── */
 .wpsc-header {
     background: var(--wpsc-primary, #2563eb) !important; color: #fff !important;
     padding: 16px 22px !important; margin: 0 !important;
     display: flex !important; align-items: center !important;
     justify-content: space-between !important; flex-shrink: 0 !important;
+    position: relative !important;
 }
 .wpsc-header-info { display: flex !important; align-items: center !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; }
+.wpsc-header-buttons { display: flex !important; align-items: center !important; gap: 0 !important; margin: 0 !important; padding: 0 !important; }
 .wpsc-avatar {
     width: 38px !important; height: 38px !important; border-radius: 50% !important;
     background: rgba(255,255,255,0.2) !important; display: flex !important;
@@ -384,4 +486,7 @@ a.wpsc-smart-address:hover {
     .wpsc-widget { bottom: 16px !important; }
     .wpsc-bottom-right { right: 16px !important; }
     .wpsc-bottom-left  { left: 16px !important; }
+    /* Disable dragging on mobile — full screen is better */
+    .wpsc-dock-btn { display: none !important; }
+    .wpsc-drag-handle { display: none !important; }
 }

@@ -1,8 +1,8 @@
 /**
- * Intelligize Chat — Frontend Widget v2.0
+ * Intelligize Chat — Frontend Widget v2.3
  *
  * Features: delay, auto-open, lead capture, contact buttons,
- * session tracking, return to start.
+ * session tracking, return to start, DRAGGABLE + DOCKABLE window.
  */
 (function () {
     'use strict';
@@ -29,15 +29,28 @@
     let leadData      = { name: '', email: '', phone: '' };
     let hasAutoOpened = false;
 
+    // ── Drag State ────────────────────────────────────────────────────────
+    let isDocked      = true;
+    let isDragging    = false;
+    let dragStartX    = 0;
+    let dragStartY    = 0;
+    let windowStartX  = 0;
+    let windowStartY  = 0;
+    let dragThreshold = 5;  // px of movement before we consider it a drag
+    let dragMoved     = false;
+
     // ── Mobile check ──────────────────────────────────────────────────────
     function isMobile() {
-        return window.innerWidth <= 768;
+        return window.innerWidth <= 480;
     }
 
     // ── Init ──────────────────────────────────────────────────────────────
     function init() {
         // Hide on mobile if configured
-        if ( !CFG.showOnMobile && isMobile() ) return;
+        if ( !CFG.showOnMobile && window.innerWidth <= 768 ) return;
+
+        // Inject drag handle + dock button into header
+        injectDragUI();
 
         // Delay before showing the widget
         const delay = (CFG.showDelay || 0) * 1000;
@@ -66,10 +79,237 @@
 
         // Close on outside click
         document.addEventListener('click', (e) => {
-            if (isOpen && !widget.contains(e.target) && !e.target.closest('#wpsc-chat-widget') && !e.target.classList.contains('wpsc-quick-reply')) {
+            if (isOpen && !widget.contains(e.target) && !chatWin.contains(e.target) && !e.target.closest('#wpsc-chat-widget') && !e.target.classList.contains('wpsc-quick-reply')) {
                 closeChat();
             }
         });
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // DRAG & DOCK SYSTEM
+    // ══════════════════════════════════════════════════════════════════════
+
+    function injectDragUI() {
+        const header = chatWin.querySelector('.wpsc-header');
+        if (!header) return;
+
+        // Add drag handle bar (visible when undocked)
+        const dragHandle = document.createElement('div');
+        dragHandle.className = 'wpsc-drag-handle';
+        header.appendChild(dragHandle);
+
+        // Wrap close button in a container with dock button
+        const existingClose = header.querySelector('.wpsc-close-btn');
+        if (existingClose) {
+            const btnGroup = document.createElement('div');
+            btnGroup.className = 'wpsc-header-buttons';
+
+            // Dock/undock button
+            const dockBtn = document.createElement('button');
+            dockBtn.className = 'wpsc-dock-btn';
+            dockBtn.id = 'wpsc-dock-btn';
+            dockBtn.setAttribute('aria-label', 'Undock chat window');
+            dockBtn.title = 'Pop out — drag to reposition';
+            dockBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+            dockBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isDocked) {
+                    undockWindow();
+                } else {
+                    dockWindow();
+                }
+            });
+
+            // Insert dock btn before close btn
+            existingClose.parentNode.insertBefore(btnGroup, existingClose);
+            btnGroup.appendChild(dockBtn);
+            btnGroup.appendChild(existingClose);
+        }
+
+        // Drag events on header (mouse)
+        header.addEventListener('mousedown', onDragStart);
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('mouseup', onDragEnd);
+
+        // Drag events on header (touch)
+        header.addEventListener('touchstart', onDragStart, { passive: false });
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('touchend', onDragEnd);
+    }
+
+    function undockWindow() {
+        if (isMobile()) return;
+
+        // Get current position on screen before undocking
+        const rect = chatWin.getBoundingClientRect();
+
+        isDocked = false;
+        chatWin.classList.add('wpsc-undocked');
+
+        // Position at current visual location
+        chatWin.style.top = rect.top + 'px';
+        chatWin.style.left = rect.left + 'px';
+
+        // Update button icon to "dock back" (arrows pointing inward)
+        const dockBtn = document.getElementById('wpsc-dock-btn');
+        if (dockBtn) {
+            dockBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+            dockBtn.title = 'Dock back to corner';
+            dockBtn.setAttribute('aria-label', 'Dock chat window');
+        }
+    }
+
+    function dockWindow() {
+        isDocked = true;
+        chatWin.classList.remove('wpsc-undocked');
+        chatWin.classList.remove('wpsc-dragging');
+
+        // Clear inline position
+        chatWin.style.top = '';
+        chatWin.style.left = '';
+
+        // Hide snap zone
+        removeSnapZone();
+
+        // Update button icon to "undock" (arrows pointing outward)
+        const dockBtn = document.getElementById('wpsc-dock-btn');
+        if (dockBtn) {
+            dockBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+            dockBtn.title = 'Pop out — drag to reposition';
+            dockBtn.setAttribute('aria-label', 'Undock chat window');
+        }
+    }
+
+    function onDragStart(e) {
+        // Only drag when undocked, and only from the header
+        if (isDocked || isMobile()) return;
+        // Don't drag if clicking a button
+        if (e.target.closest('button')) return;
+
+        const touch = e.touches ? e.touches[0] : e;
+        dragStartX = touch.clientX;
+        dragStartY = touch.clientY;
+
+        const rect = chatWin.getBoundingClientRect();
+        windowStartX = rect.left;
+        windowStartY = rect.top;
+
+        isDragging = true;
+        dragMoved = false;
+
+        if (e.touches) e.preventDefault();
+    }
+
+    function onDragMove(e) {
+        if (!isDragging) return;
+
+        const touch = e.touches ? e.touches[0] : e;
+        const dx = touch.clientX - dragStartX;
+        const dy = touch.clientY - dragStartY;
+
+        // Only start visual drag after threshold
+        if (!dragMoved && Math.abs(dx) < dragThreshold && Math.abs(dy) < dragThreshold) return;
+        dragMoved = true;
+
+        chatWin.classList.add('wpsc-dragging');
+
+        // Calculate new position, clamped to viewport
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const w = chatWin.offsetWidth;
+        const h = chatWin.offsetHeight;
+
+        let newX = windowStartX + dx;
+        let newY = windowStartY + dy;
+
+        // Keep at least 60px visible on screen
+        newX = Math.max(-w + 60, Math.min(vw - 60, newX));
+        newY = Math.max(0, Math.min(vh - 60, newY));
+
+        chatWin.style.left = newX + 'px';
+        chatWin.style.top = newY + 'px';
+
+        // Show snap zone when dragged near the original dock position
+        checkSnapZone(newX, newY);
+
+        if (e.touches) e.preventDefault();
+        e.preventDefault();
+    }
+
+    function onDragEnd(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        chatWin.classList.remove('wpsc-dragging');
+
+        // If dragged into snap zone, dock it
+        if (dragMoved && isNearDockPosition()) {
+            dockWindow();
+        }
+
+        removeSnapZone();
+    }
+
+    // ── Snap Zone (visual hint for docking back) ──────────────────────────
+
+    function checkSnapZone(x, y) {
+        const pos = CFG.position || 'bottom-right';
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        // Dock position: where the window normally sits
+        let dockX, dockY;
+        if (pos === 'bottom-left') {
+            dockX = 24;
+            dockY = vh - 580 - 76 - 24; // bottom:24 + toggle area
+        } else {
+            dockX = vw - 390 - 24;
+            dockY = vh - 580 - 76 - 24;
+        }
+
+        const dist = Math.sqrt(Math.pow(x - dockX, 2) + Math.pow(y - dockY, 2));
+
+        if (dist < 200) {
+            showSnapZone();
+        } else {
+            removeSnapZone();
+        }
+    }
+
+    function isNearDockPosition() {
+        const rect = chatWin.getBoundingClientRect();
+        const pos = CFG.position || 'bottom-right';
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let dockX, dockY;
+        if (pos === 'bottom-left') {
+            dockX = 24;
+            dockY = vh - 580 - 76 - 24;
+        } else {
+            dockX = vw - 390 - 24;
+            dockY = vh - 580 - 76 - 24;
+        }
+
+        const dist = Math.sqrt(Math.pow(rect.left - dockX, 2) + Math.pow(rect.top - dockY, 2));
+        return dist < 150;
+    }
+
+    function showSnapZone() {
+        let zone = document.getElementById('wpsc-snap-zone');
+        if (!zone) {
+            zone = document.createElement('div');
+            zone.id = 'wpsc-snap-zone';
+            zone.className = 'wpsc-snap-zone';
+            const pos = CFG.position || 'bottom-right';
+            zone.classList.add(pos === 'bottom-left' ? 'wpsc-snap-left' : 'wpsc-snap-right');
+            document.body.appendChild(zone);
+        }
+        zone.classList.add('wpsc-snap-visible');
+    }
+
+    function removeSnapZone() {
+        const zone = document.getElementById('wpsc-snap-zone');
+        if (zone) zone.classList.remove('wpsc-snap-visible');
     }
 
     // ── Session ID ────────────────────────────────────────────────────────
@@ -87,6 +327,13 @@
         chatWin.setAttribute('aria-hidden', 'false');
         toggle.classList.remove('wpsc-pulse');
 
+        // If undocked, make sure it's visible
+        if (!isDocked) {
+            chatWin.style.opacity = '1';
+            chatWin.style.transform = 'none';
+            chatWin.style.pointerEvents = 'all';
+        }
+
         if (messages.children.length === 0) {
             // Check if lead capture is needed first
             if ( CFG.leadCapture && CFG.leadCapture.enabled && !leadCaptured ) {
@@ -103,6 +350,12 @@
         isOpen = false;
         widget.classList.remove('wpsc-open');
         chatWin.setAttribute('aria-hidden', 'true');
+
+        // If undocked, also hide it properly
+        if (!isDocked) {
+            chatWin.style.opacity = '0';
+            chatWin.style.pointerEvents = 'none';
+        }
     }
 
     function showWelcome() {
@@ -428,30 +681,33 @@
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
 
         // ── Auto-link emails ──
-        // Matches common email patterns not already inside an href
         html = html.replace(
-            /(?<!href=["'](?:[^"']*))(?<!>)\b([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})\b/g,
-            '<a href="mailto:$1" class="wpsc-smart-link wpsc-smart-email">📧 $1</a>'
+            /(?:[\u{1F4E7}\u{1F4E8}\u{1F4E9}\u{2709}\u{FE0F}]\s*)?([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/gu,
+            function(match, email) {
+                if (match.indexOf('mailto:') !== -1) return match;
+                return '<a href="mailto:' + email + '" class="wpsc-smart-link wpsc-smart-email">📧 ' + email + '</a>';
+            }
         );
 
         // ── Auto-link phone numbers ──
-        // Matches: (555) 123-4567, 555-123-4567, +1 555 123 4567, +15551234567, etc.
         html = html.replace(
-            /(?<![\w\-])(\+?1?\s*[-.]?\s*\(?\d{3}\)?[\s.\-]*\d{3}[\s.\-]*\d{4})(?![\w\-])/g,
+            /(?:[\u{1F4DE}\u{1F4F1}\u{1F4F2}\u{260E}\u{2706}\u{FE0F}]\s*)?(\+?1?\s*[-.]?\s*\(?\d{3}\)?[\s.\-]*\d{3}[\s.\-]*\d{4})/gu,
             function(match, phone) {
+                if (match.indexOf('tel:') !== -1) return match;
                 var digits = phone.replace(/[^\d+]/g, '');
-                if (digits.length < 10) return match; // Skip if too short
+                if (digits.length < 10) return match;
                 return '<a href="tel:' + digits + '" class="wpsc-smart-link wpsc-smart-phone">📞 ' + phone.trim() + '</a>';
             }
         );
 
         // ── Auto-link addresses ──
-        // Matches patterns like: 123 Main St, City, ST 12345 or similar
         html = html.replace(
-            /(\d{1,5}\s+[A-Za-z0-9\s.]+(?:Street|St|Avenue|Ave|Boulevard|Blvd|Drive|Dr|Road|Rd|Lane|Ln|Way|Court|Ct|Circle|Cir|Place|Pl|Parkway|Pkwy|Highway|Hwy)[.,]?\s*(?:[A-Za-z\s]+,\s*)?(?:[A-Z]{2}\s+\d{5}(?:-\d{4})?))/gi,
+            /(\d{1,5}\s+[A-Za-z0-9\s.]+\b(?:Street|Avenue|Boulevard|Drive|Road|Lane|Way|Court|Circle|Place|Parkway|Highway)\b[.,]?(?:\s*(?:Suite|Ste|Unit|Apt|#)\s*\w+)?[.,]?\s*(?:[A-Za-z]+(?:\s+[A-Za-z]+)*[,]\s*)?(?:[A-Z]{2}\s+\d{5}(?:-\d{4})?)?(?:[,\s]+[A-Za-z]+)?)/g,
             function(match, addr) {
-                var encoded = encodeURIComponent(addr.trim());
-                return '<a href="https://www.google.com/maps/search/?api=1&query=' + encoded + '" target="_blank" rel="noopener" class="wpsc-smart-link wpsc-smart-address">📍 ' + addr.trim() + '</a>';
+                var clean = addr.trim().replace(/[,\s]+$/, '');
+                if (clean.length < 12) return match;
+                var encoded = encodeURIComponent(clean);
+                return '<a href="https://www.google.com/maps/search/?api=1&query=' + encoded + '" target="_blank" rel="noopener" class="wpsc-smart-link wpsc-smart-address">📍 ' + clean + '</a>';
             }
         );
 

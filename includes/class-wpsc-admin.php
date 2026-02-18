@@ -81,6 +81,14 @@ class WPSC_Admin {
     // SETTINGS PAGE
     // ══════════════════════════════════════════════════════════════════════
     public function render_settings_page() {
+        // Handle enable/disable toggle
+        if ( isset( $_POST['wpsc_toggle_enabled'] ) && check_admin_referer( 'wpsc_toggle_enabled' ) ) {
+            $new_state = sanitize_text_field( $_POST['wpsc_new_state'] );
+            update_option( 'wpsc_enabled', $new_state );
+            echo '<div class="notice notice-success is-dismissible"><p>Chatbot ' . ( $new_state === '1' ? 'enabled' : 'disabled' ) . '.</p></div>';
+        }
+
+        // Handle manual reindex
         if ( isset( $_POST['wpsc_reindex'] ) && check_admin_referer( 'wpsc_reindex_action' ) ) {
             $indexer = new WPSC_Content_Indexer();
             $index   = $indexer->build_index();
@@ -124,10 +132,11 @@ class WPSC_Admin {
                 <?php endforeach; ?>
             </div>
 
-            <form method="post" action="options.php">
-                <?php settings_fields( 'wpsc_settings' ); ?>
-
-                <!-- Enable/Disable -->
+            <!-- Enable/Disable — Separate form so it saves independently -->
+            <form method="post" id="wpsc-toggle-form">
+                <?php wp_nonce_field( 'wpsc_toggle_enabled' ); ?>
+                <input type="hidden" name="wpsc_toggle_enabled" value="1">
+                <input type="hidden" name="wpsc_new_state" value="<?php echo $o['wpsc_enabled'] ? '0' : '1'; ?>">
                 <div style="background:#fff;border:1px solid #c3c4c7;border-left:4px solid <?php echo $o['wpsc_enabled'] ? '#00a32a' : '#d63638'; ?>;padding:16px 20px;margin:20px 0;border-radius:0 4px 4px 0;display:flex;align-items:center;justify-content:space-between;">
                     <div>
                         <strong style="font-size:15px;">
@@ -135,14 +144,17 @@ class WPSC_Admin {
                         </strong>
                         <p style="margin:4px 0 0;color:#646970;">Toggle the chatbot on or off across your entire site.</p>
                     </div>
-                    <label style="position:relative;display:inline-block;width:52px;height:28px;flex-shrink:0;">
-                        <input type="hidden" name="wpsc_enabled" value="0">
-                        <input type="checkbox" name="wpsc_enabled" value="1" <?php checked( $o['wpsc_enabled'], '1' ); ?> style="opacity:0;width:0;height:0;position:absolute;" onchange="this.form.submit();">
-                        <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:<?php echo $o['wpsc_enabled'] ? '#00a32a' : '#c3c4c7'; ?>;border-radius:28px;transition:0.3s;">
+                    <label style="position:relative;display:inline-block;width:52px;height:28px;flex-shrink:0;cursor:pointer;" onclick="document.getElementById('wpsc-toggle-form').submit();">
+                        <span style="position:absolute;top:0;left:0;right:0;bottom:0;background:<?php echo $o['wpsc_enabled'] ? '#00a32a' : '#c3c4c7'; ?>;border-radius:28px;transition:0.3s;">
                             <span style="position:absolute;height:22px;width:22px;left:<?php echo $o['wpsc_enabled'] ? '27px' : '3px'; ?>;bottom:3px;background:#fff;border-radius:50%;transition:0.3s;box-shadow:0 1px 3px rgba(0,0,0,0.2);display:block;"></span>
                         </span>
                     </label>
                 </div>
+            </form>
+
+            <form method="post" action="options.php">
+                <?php settings_fields( 'wpsc_settings' ); ?>
+                <input type="hidden" name="wpsc_enabled" value="<?php echo esc_attr( $o['wpsc_enabled'] ); ?>">
 
                 <!-- ▸ Widget Behavior -->
                 <h2 class="title">Widget Behavior</h2>

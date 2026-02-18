@@ -51,6 +51,7 @@ class WPSC_Admin {
             'wpsc_lead_capture', 'wpsc_lead_capture_title',
             'wpsc_lead_require_email', 'wpsc_lead_require_name', 'wpsc_lead_require_phone',
             'wpsc_ai_provider', 'wpsc_api_key', 'wpsc_enable_logging',
+            'wpsc_avatar',
         );
         foreach ( $fields as $f ) {
             register_setting( 'wpsc_settings', $f );
@@ -95,6 +96,7 @@ class WPSC_Admin {
             'wpsc_contact_sms','wpsc_contact_page_url','wpsc_lead_capture',
             'wpsc_lead_capture_title','wpsc_lead_require_email','wpsc_lead_require_name',
             'wpsc_lead_require_phone','wpsc_ai_provider','wpsc_api_key','wpsc_enable_logging',
+            'wpsc_avatar',
         );
         foreach ( $keys as $k ) {
             $o[ $k ] = get_option( $k, '' );
@@ -191,6 +193,30 @@ class WPSC_Admin {
                     <tr>
                         <th><label for="wpsc_bot_name">Bot Name</label></th>
                         <td><input type="text" id="wpsc_bot_name" name="wpsc_bot_name" value="<?php echo esc_attr( $o['wpsc_bot_name'] ); ?>" class="regular-text"></td>
+                    </tr>
+                    <tr>
+                        <th>Avatar</th>
+                        <td>
+                            <?php
+                            $avatar = isset( $o['wpsc_avatar'] ) && $o['wpsc_avatar'] ? $o['wpsc_avatar'] : 'bot';
+                            $avatars = array(
+                                'bot'    => array( 'label' => 'Robot',  'file' => 'avatar-bot.svg' ),
+                                'male'   => array( 'label' => 'Male',   'file' => 'avatar-male.svg' ),
+                                'female' => array( 'label' => 'Female', 'file' => 'avatar-female.svg' ),
+                            );
+                            ?>
+                            <div style="display:flex;gap:16px;align-items:flex-end;">
+                                <?php foreach ( $avatars as $key => $av ) : ?>
+                                <label style="text-align:center;cursor:pointer;">
+                                    <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:3px solid <?php echo $avatar === $key ? '#2563eb' : '#e2e8f0'; ?>;transition:border-color 0.2s;margin-bottom:6px;">
+                                        <img src="<?php echo esc_url( WPSC_PLUGIN_URL . 'assets/images/' . $av['file'] ); ?>" style="width:100%;height:100%;display:block;" alt="<?php echo esc_attr( $av['label'] ); ?>">
+                                    </div>
+                                    <input type="radio" name="wpsc_avatar" value="<?php echo esc_attr( $key ); ?>" <?php checked( $avatar, $key ); ?> style="margin:0 auto;display:block;">
+                                    <span style="font-size:12px;color:#475569;"><?php echo esc_html( $av['label'] ); ?></span>
+                                </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </td>
                     </tr>
                     <tr>
                         <th><label for="wpsc_welcome_message">Welcome Message</label></th>

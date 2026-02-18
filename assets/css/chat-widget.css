@@ -74,12 +74,13 @@
 }
 .wpsc-header-info { display: flex !important; align-items: center !important; gap: 12px !important; margin: 0 !important; padding: 0 !important; }
 .wpsc-avatar {
-    width: 38px !important; height: 38px !important; border-radius: 10px !important;
+    width: 38px !important; height: 38px !important; border-radius: 50% !important;
     background: rgba(255,255,255,0.2) !important; display: flex !important;
     align-items: center !important; justify-content: center !important;
     flex-shrink: 0 !important; margin: 0 !important; padding: 0 !important;
+    overflow: hidden !important;
 }
-.wpsc-avatar svg { width: 20px !important; height: 20px !important; color: #fff !important; }
+.wpsc-avatar img { width: 100% !important; height: 100% !important; border-radius: 50% !important; display: block !important; object-fit: cover !important; }
 .wpsc-header-name { display: block !important; font-weight: 600 !important; font-size: 15px !important; line-height: 1.2 !important; margin: 0 !important; padding: 0 !important; }
 .wpsc-header-status { display: block !important; font-size: 12px !important; opacity: 0.8 !important; margin: 0 !important; padding: 0 !important; }
 .wpsc-header-status::before {

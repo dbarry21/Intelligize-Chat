@@ -88,6 +88,9 @@ class WPSC_Frontend {
         $position = get_option( 'wpsc_position', 'bottom-right' );
         $bot_name = get_option( 'wpsc_bot_name', 'Intelligize Assistant' );
         $mobile   = get_option( 'wpsc_show_on_mobile', '1' );
+        $avatar   = get_option( 'wpsc_avatar', 'bot' );
+        $avatar_file = 'avatar-' . ( in_array( $avatar, array( 'bot', 'male', 'female' ), true ) ? $avatar : 'bot' ) . '.svg';
+        $avatar_url  = WPSC_PLUGIN_URL . 'assets/images/' . $avatar_file;
         ?>
         <div id="wpsc-chat-widget" class="wpsc-widget wpsc-<?php echo esc_attr( $position ); ?> <?php echo $mobile !== '1' ? 'wpsc-hide-mobile' : ''; ?>" style="--wpsc-primary: <?php echo esc_attr( $color ); ?>; display:none;">
 
@@ -99,7 +102,7 @@ class WPSC_Frontend {
             <div id="wpsc-window" class="wpsc-window" aria-hidden="true">
                 <div class="wpsc-header">
                     <div class="wpsc-header-info">
-                        <div class="wpsc-avatar"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect x="2" y="2" width="20" height="20" rx="2"/><path d="m2 12 5.5-5.5"/><path d="M7 12h3l2.5-2.5"/><path d="M14 12h3l2 2"/><circle cx="16" cy="16" r="2"/></svg></div>
+                        <div class="wpsc-avatar"><img src="<?php echo esc_url( $avatar_url ); ?>" alt="<?php echo esc_attr( $bot_name ); ?>" style="width:100%!important;height:100%!important;border-radius:50%!important;display:block!important;"></div>
                         <div>
                             <span class="wpsc-header-name"><?php echo esc_html( $bot_name ); ?></span>
                             <span class="wpsc-header-status">Online</span>

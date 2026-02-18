@@ -3,7 +3,7 @@
  * Plugin Name: Intelligize Chat
  * Plugin URI:  https://github.com/dbarry21/Intelligize-Chat
  * Description: An AI-powered floating chatbot that answers visitor questions using your website content.
- * Version:     2.0.0
+ * Version:     2.1.0
  * Author:      dbarry21
  * Author URI:  https://github.com/dbarry21
  * License:     GPL v2 or later
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Constants ────────────────────────────────────────────────────────────────
-define( 'WPSC_VERSION', '2.0.0' );
+define( 'WPSC_VERSION', '2.1.0' );
 define( 'WPSC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WPSC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPSC_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
@@ -82,6 +82,7 @@ function wpsc_activate() {
         'wpsc_post_types'         => array( 'page', 'post' ),
         'wpsc_ai_provider'        => 'local',
         'wpsc_api_key'            => '',
+        'wpsc_avatar'             => 'bot',
 
         // Logging
         'wpsc_enable_logging'     => '1',
